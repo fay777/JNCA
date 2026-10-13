@@ -1,0 +1,69 @@
+arrival_rate:
+  distribution: possion
+  dtype: float
+  lam: 0.04
+  reciprocal: true
+events_file_name: events.yaml
+lifetime:
+  distribution: exponential
+  dtype: float
+  scale: 1000
+link_attrs_setting:
+- constraints: le
+  distribution: uniform
+  dtype: int
+  generative: true
+  high: 30
+  low: 2
+  name: bw
+  owner: link
+  type: resource
+- constraints: le
+  distribution: uniform
+  dtype: int
+  generative: true
+  high: 3
+  low: 1
+  name: security
+  owner: link
+  type: security
+node_attrs_setting:
+- constraints: le
+  distribution: uniform
+  dtype: int
+  generative: true
+  high: 30
+  low: 2
+  name: cpu
+  owner: node
+  type: resource
+- constraints: le
+  distribution: uniform
+  dtype: int
+  generative: true
+  high: 30
+  low: 2
+  name: mem
+  owner: node
+  type: resource
+- constraints: le
+  distribution: uniform
+  dtype: int
+  generative: true
+  high: 6
+  low: 1
+  name: security
+  owner: node
+  type: security
+num_v_nets: 1000
+save_dir: dataset\v_nets
+setting_file_name: v_sim_setting.yaml
+topology:
+  type: path
+v_net_size:
+  distribution: uniform
+  dtype: int
+  high: 10
+  low: 2
+v_nets_file_name: v_net.gml
+v_nets_save_dir: v_nets

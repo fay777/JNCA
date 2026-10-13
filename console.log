@@ -1,0 +1,21 @@
+nohup: 忽略输入
+Traceback (most recent call last):
+  File "main.py", line 8, in <module>
+    from solver import REGISTRY
+  File "/home/zhangpeiying/lfy/JNCA_repro_v2/solver/__init__.py", line 3, in <module>
+    from .heuristic import *
+  File "/home/zhangpeiying/lfy/JNCA_repro_v2/solver/heuristic/__init__.py", line 2, in <module>
+    from .fit import FirstFitSolver
+  File "/home/zhangpeiying/lfy/JNCA_repro_v2/solver/heuristic/fit.py", line 8, in <module>
+    from ..learning.gat_seq2seq_ppo.sub_env import SubEnv
+  File "/home/zhangpeiying/lfy/JNCA_repro_v2/solver/learning/__init__.py", line 2, in <module>
+    from .a3c_gcn_seq2seq import A3CGcnSeq2SeqSolver
+  File "/home/zhangpeiying/lfy/JNCA_repro_v2/solver/learning/a3c_gcn_seq2seq/__init__.py", line 1, in <module>
+    from .solver import A3CGcnSeq2SeqSolver
+  File "/home/zhangpeiying/lfy/JNCA_repro_v2/solver/learning/a3c_gcn_seq2seq/solver.py", line 20, in <module>
+    from ..rl_solver import RLSolver, PPOSolver, InstanceAgent, A2CSolver
+  File "/home/zhangpeiying/lfy/JNCA_repro_v2/solver/learning/rl_solver.py", line 32, in <module>
+    from utils.virtualize import Visualization_epoch
+  File "/home/zhangpeiying/lfy/JNCA_repro_v2/utils/virtualize.py", line 9, in <module>
+    import seaborn as sns
+ModuleNotFoundError: No module named 'seaborn'

@@ -1,0 +1,14 @@
+# cache
+*.py[cod]
+__pycache__/
+.DS_Store
+*/.DS_Store
+
+# save
+logs/*/
+save/*/
+
+# dataset
+dataset/v_nets/
+dataset/p_net/
+
