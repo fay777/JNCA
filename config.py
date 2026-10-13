@@ -53,6 +53,14 @@ env_arg.add_argument('--if_temp_save_records', type=str2bool, default=True, help
 env_arg.add_argument('--node_resource_unit_price', type=float, default=1., help='') 
 env_arg.add_argument('--link_resource_unit_price', type=float, default=1., help='') 
 env_arg.add_argument('--time_window_size', type=int, default=100., help='The time window for batch VNE, only working for BatchScenario') 
+env_arg.add_argument('--security_ssi_threshold', type=float, default=4.0,
+                     help='SSI threshold defining a security-sensitive SFC request')
+env_arg.add_argument('--security_max_level', type=float, default=6.0,
+                     help='Maximum virtual-node security-demand level used to normalize trust constraints')
+env_arg.add_argument('--trust_security_weight', type=float, default=0.6,
+                     help='Weight of static node security in the dynamic trust model')
+env_arg.add_argument('--trust_feedback_weight', type=float, default=0.4,
+                     help='Weight of deployment feedback in the dynamic trust model')
 
 ### solver  ###
 solver_arg = parser.add_argument_group('solver')

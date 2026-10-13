@@ -139,13 +139,15 @@ class PhysicalNetwork(Network):
         net.generate_attrs_data()
         return net
 
-    def init_network_trust(self):
+    def init_network_trust(self, trust_security_weight=0.6, trust_feedback_weight=0.4):
+        self.trust_security_weight = trust_security_weight
+        self.trust_feedback_weight = trust_feedback_weight
         for i in range(self.num_nodes):
             self.update_get_trust(i)
 
     def update_get_trust(self, node_id, success_count=0):
-        beta = 0.45
-        gamma = 0.55
+        beta = self.trust_security_weight if hasattr(self, 'trust_security_weight') else 0.6
+        gamma = self.trust_feedback_weight if hasattr(self, 'trust_feedback_weight') else 0.4
         node = self.nodes[node_id]
         if 'deploy_count' not in node:
             node['deploy_count'] = 0

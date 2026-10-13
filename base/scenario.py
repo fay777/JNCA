@@ -37,12 +37,18 @@ class Scenario:
         config.p_net_dataset_dir = get_p_net_dataset_dir_from_setting(config.p_net_setting)
         if os.path.exists(config.p_net_dataset_dir):
             p_net = PhysicalNetwork.load_dataset(config.p_net_dataset_dir)
-            p_net.init_network_trust()
+            p_net.init_network_trust(
+                trust_security_weight=config.trust_security_weight,
+                trust_feedback_weight=config.trust_feedback_weight,
+            )
 
             print(f'*** Load Physical Network from {config.p_net_dataset_dir} *** ') if config.verbose >= 1 else None
         else:
             p_net = PhysicalNetwork.from_setting(config.p_net_setting)
-            p_net.init_network_trust()
+            p_net.init_network_trust(
+                trust_security_weight=config.trust_security_weight,
+                trust_feedback_weight=config.trust_feedback_weight,
+            )
 
             print(f'*** Generate Physical Network from setting *** ')
         v_net_simulator = VirtualNetworkRequestSimulator.from_setting(config.v_sim_setting)

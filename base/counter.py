@@ -21,6 +21,50 @@ class Counter(object):
 
         self.node_resource_attrs = [n_attr for n_attr in self.all_node_attrs if n_attr.type == 'resource']
         self.link_resource_attrs = [l_attr for l_attr in self.all_link_attrs if l_attr.type == 'resource']
+        self.security_ssi_threshold = kwargs.get('security_ssi_threshold', 4.0)
+        self.security_max_level = kwargs.get('security_max_level', 6.0)
+
+    def evaluate_security_requirements(
+            self, v_net: VirtualNetwork, p_net: PhysicalNetwork, solution: Solution
+        ) -> dict:
+        """Evaluate the paper's node-trust and link-security constraints.
+
+        The returned fields are persisted in per-request records.  SRSR is
+        later calculated over *all* security-sensitive arrivals, so rejected
+        requests lower the rate instead of being silently excluded.
+        """
+        security_sensitive = float(getattr(v_net, 'ssi', 0.0)) >= self.security_ssi_threshold
+        complete_node_mapping = len(solution['node_slots']) == v_net.num_nodes
+        complete_link_mapping = len(solution['link_paths']) == v_net.num_links
+
+        node_security_satisfied = complete_node_mapping
+        if node_security_satisfied:
+            for v_node_id, p_node_id in solution['node_slots'].items():
+                required_trust = v_net.nodes[v_node_id].get('security', 0.0) / self.security_max_level
+                if p_net.nodes[p_node_id].get('trust', 0.0) < required_trust:
+                    node_security_satisfied = False
+                    break
+
+        link_security_satisfied = complete_link_mapping
+        if link_security_satisfied:
+            for v_link, p_links in solution['link_paths'].items():
+                required_security = v_net.links[v_link].get('security', 0.0)
+                for p_link in p_links:
+                    if p_net.edges[p_link].get('security', 0.0) < required_security:
+                        link_security_satisfied = False
+                        break
+                if not link_security_satisfied:
+                    break
+
+        security_requirements_satisfied = bool(
+            solution['result'] and node_security_satisfied and link_security_satisfied
+        )
+        return {
+            'security_sensitive': security_sensitive,
+            'node_security_satisfied': node_security_satisfied,
+            'link_security_satisfied': link_security_satisfied,
+            'security_requirements_satisfied': security_requirements_satisfied,
+        }
 
     def count_partial_solution(self, v_net: VirtualNetwork, solution: Solution) -> dict:
         """
@@ -91,6 +135,7 @@ class Counter(object):
         Returns：
             dict：具有收益和成本的部分解决方案的信息
         """
+        solution.update(self.evaluate_security_requirements(v_net, p_net, solution))
         TS = 0  # SFC安全性能要求
         # node revenue cost
         v_net_node_revenue = 0
@@ -279,6 +324,16 @@ class Counter(object):
         summary_info['early_rejection_count'] = ((records['event_type']==1) & (records['early_rejection']==True)).sum()
         summary_info['place_failure_count'] = ((records['event_type']==1) & (records['place_result']==False)).sum()
         summary_info['route_failure_count'] = ((records['event_type']==1) & (records['route_result']==False)).sum()
+        arrival_records = records[records['event_type'] == 1]
+        security_sensitive_records = arrival_records[arrival_records['security_sensitive'] == True]
+        summary_info['security_sensitive_request_count'] = len(security_sensitive_records)
+        summary_info['security_sensitive_success_count'] = int(
+            security_sensitive_records['security_requirements_satisfied'].sum()
+        )
+        summary_info['srsr'] = (
+            summary_info['security_sensitive_success_count'] / summary_info['security_sensitive_request_count']
+            if summary_info['security_sensitive_request_count'] else 0.0
+        )
         # rc ratio
         summary_info['r2c_ratio'] = records.iloc[-1]['total_revenue'] / records.iloc[-1]['total_cost'] if records.iloc[-1]['total_cost'] else 0
         summary_info['time_r2c_ratio'] = records.iloc[-1]['total_time_revenue'] / records.iloc[-1]['total_time_cost']  if records.iloc[-1]['total_time_cost'] else 0

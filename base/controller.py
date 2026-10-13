@@ -187,6 +187,7 @@ class Controller:
 
             self.node_security_attrs = [n_attr for n_attr in self.all_node_attrs if n_attr.type == 'security']
             self.link_security_attrs = [l_attr for l_attr in self.all_link_attrs if l_attr.type == 'security']
+            self.security_max_level = kwargs.get('security_max_level', 6.0)
 
             self.link_latency_attrs = [l_attr for l_attr in self.all_link_attrs if l_attr.type == 'latency']
             self.reusable = kwargs.get('reusable', False)
@@ -301,7 +302,17 @@ class Controller:
         """
         assert p_node_id in list(p_net.nodes)
         v_node, p_node = v_net.nodes[v_node_id], p_net.nodes[p_node_id]
-        final_result, node_satisfiability_info = self.check_attributes(v_node, p_node, self.all_node_attrs)
+        # Resource feasibility remains unchanged.  Node-security feasibility
+        # follows the manuscript's dynamic trust constraint instead of a
+        # direct comparison with the static physical-node security level.
+        final_result, node_satisfiability_info = self.check_attributes(
+            v_node, p_node, self.node_resource_attrs
+        )
+        required_trust = v_node.get('security', 0.0) / self.security_max_level
+        available_trust = p_node.get('trust', 0.0)
+        trust_satisfied = available_trust >= required_trust
+        node_satisfiability_info['trust'] = max(0.0, required_trust - available_trust)
+        final_result = final_result and trust_satisfied
         return final_result, node_satisfiability_info
 
     def check_link_constraints(
